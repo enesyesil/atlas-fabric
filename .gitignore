@@ -1,0 +1,20 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.venv/
+*.egg-info/
+dist/
+build/
+
+# Environment
+.env
+
+# Data (large files — download separately)
+data/*.geojson
+data/*.shp
+data/*.zip
+
+# Editor
+.DS_Store
+*.swp

@@ -1,0 +1,254 @@
+{
+  "polities": [
+    {
+      "id": "frankish_empire",
+      "name": "Frankish Empire",
+      "also_known_as": ["Francia", "Carolingian Empire"],
+      "active_from": 481,
+      "active_to": 987,
+      "peak_years": [800, 814],
+      "region_hint": "europe",
+      "notes": "Charlemagne crowned Holy Roman Emperor 800 CE. Split by Treaty of Verdun 843."
+    },
+    {
+      "id": "byzantine_empire",
+      "name": "Byzantine Empire",
+      "also_known_as": ["Eastern Roman Empire", "Byzantium"],
+      "active_from": 330,
+      "active_to": 1453,
+      "peak_years": [565, 1025],
+      "region_hint": "europe",
+      "notes": "Survived until fall of Constantinople 1453."
+    },
+    {
+      "id": "abbasid_caliphate",
+      "name": "Abbasid Caliphate",
+      "also_known_as": ["Abbasid Empire"],
+      "active_from": 750,
+      "active_to": 1258,
+      "peak_years": [800, 850],
+      "region_hint": "middle_east",
+      "notes": "Replaced Umayyad Caliphate. Ended with Mongol sack of Baghdad 1258."
+    },
+    {
+      "id": "umayyad_caliphate",
+      "name": "Umayyad Caliphate",
+      "also_known_as": ["Umayyad Empire"],
+      "active_from": 661,
+      "active_to": 750,
+      "peak_years": [720],
+      "region_hint": "middle_east",
+      "notes": "Overthrown by Abbasid Revolution 750. Umayyad emirate survived in Al-Andalus."
+    },
+    {
+      "id": "umayyad_emirate_andalus",
+      "name": "Umayyad Emirate of Córdoba",
+      "also_known_as": ["Al-Andalus", "Emirate of Córdoba"],
+      "active_from": 756,
+      "active_to": 929,
+      "peak_years": [800, 850],
+      "region_hint": "europe",
+      "notes": "Became Caliphate of Córdoba in 929."
+    },
+    {
+      "id": "caliphate_cordoba",
+      "name": "Caliphate of Córdoba",
+      "also_known_as": ["Cordoban Caliphate"],
+      "active_from": 929,
+      "active_to": 1031,
+      "peak_years": [1000],
+      "region_hint": "europe",
+      "notes": "Fragmented into taifa kingdoms 1031."
+    },
+    {
+      "id": "holy_roman_empire",
+      "name": "Holy Roman Empire",
+      "also_known_as": ["HRE", "German Kingdom"],
+      "active_from": 962,
+      "active_to": 1806,
+      "peak_years": [1050, 1200],
+      "region_hint": "europe",
+      "notes": "Founded by Otto I. Complex feudal structure, not a centralized state."
+    },
+    {
+      "id": "kingdom_england",
+      "name": "Kingdom of England",
+      "also_known_as": ["England"],
+      "active_from": 927,
+      "active_to": 1707,
+      "peak_years": [1200, 1400],
+      "region_hint": "europe",
+      "notes": "Unified by Æthelstan 927. Became Kingdom of Great Britain 1707."
+    },
+    {
+      "id": "kingdom_france",
+      "name": "Kingdom of France",
+      "also_known_as": ["France"],
+      "active_from": 987,
+      "active_to": 1792,
+      "peak_years": [1300, 1600],
+      "region_hint": "europe",
+      "notes": "Capetian dynasty from 987. Became Republic 1792."
+    },
+    {
+      "id": "mongol_empire",
+      "name": "Mongol Empire",
+      "also_known_as": ["Great Mongol Nation"],
+      "active_from": 1206,
+      "active_to": 1368,
+      "peak_years": [1260, 1279],
+      "region_hint": "central_asia",
+      "notes": "Largest contiguous land empire. Fragmented into Khanates."
+    },
+    {
+      "id": "tang_dynasty",
+      "name": "Tang Dynasty",
+      "also_known_as": ["Tang China"],
+      "active_from": 618,
+      "active_to": 907,
+      "peak_years": [700, 750],
+      "region_hint": "east_asia",
+      "notes": "Golden age of Chinese civilization."
+    },
+    {
+      "id": "song_dynasty",
+      "name": "Song Dynasty",
+      "also_known_as": ["Song China"],
+      "active_from": 960,
+      "active_to": 1279,
+      "peak_years": [1000, 1100],
+      "region_hint": "east_asia",
+      "notes": "Northern Song fell to Jin dynasty 1127; Southern Song ended 1279."
+    },
+    {
+      "id": "roman_empire",
+      "name": "Roman Empire",
+      "also_known_as": ["Rome", "Imperium Romanum"],
+      "active_from": -27,
+      "active_to": 476,
+      "peak_years": [100, 200],
+      "region_hint": "europe",
+      "notes": "Western Roman Empire fell 476 CE. Eastern continued as Byzantine Empire."
+    },
+    {
+      "id": "ottoman_empire",
+      "name": "Ottoman Empire",
+      "also_known_as": ["Ottoman State", "Sublime Porte"],
+      "active_from": 1299,
+      "active_to": 1922,
+      "peak_years": [1550, 1683],
+      "region_hint": "middle_east",
+      "notes": "Founded by Osman I. Succeeded by Republic of Turkey 1923."
+    },
+    {
+      "id": "kievan_rus",
+      "name": "Kievan Rus",
+      "also_known_as": ["Rus Khaganate", "Rus"],
+      "active_from": 882,
+      "active_to": 1240,
+      "peak_years": [980, 1054],
+      "region_hint": "europe",
+      "notes": "Fragmented into principalities; destroyed by Mongol invasion 1237-1242."
+    },
+    {
+      "id": "kingdom_poland",
+      "name": "Kingdom of Poland",
+      "also_known_as": ["Poland"],
+      "active_from": 1025,
+      "active_to": 1795,
+      "peak_years": [1400, 1600],
+      "region_hint": "europe",
+      "notes": "Crowned kingdom 1025. Merged with Lithuania 1569."
+    },
+    {
+      "id": "kingdom_hungary",
+      "name": "Kingdom of Hungary",
+      "also_known_as": ["Hungary"],
+      "active_from": 1000,
+      "active_to": 1918,
+      "peak_years": [1200, 1400],
+      "region_hint": "europe",
+      "notes": "Founded by Stephen I 1000. Part of Habsburg Empire from 1526."
+    },
+    {
+      "id": "kingdom_denmark",
+      "name": "Kingdom of Denmark",
+      "also_known_as": ["Denmark"],
+      "active_from": 936,
+      "active_to": 1814,
+      "peak_years": [1100, 1400],
+      "region_hint": "europe",
+      "notes": "One of the oldest monarchies."
+    },
+    {
+      "id": "kingdom_norway",
+      "name": "Kingdom of Norway",
+      "also_known_as": ["Norway"],
+      "active_from": 872,
+      "active_to": 1814,
+      "peak_years": [1000, 1200],
+      "region_hint": "europe",
+      "notes": "United under Harald Fairhair ~872."
+    },
+    {
+      "id": "kingdom_sweden",
+      "name": "Kingdom of Sweden",
+      "also_known_as": ["Sweden"],
+      "active_from": 970,
+      "active_to": 1809,
+      "peak_years": [1600, 1700],
+      "region_hint": "europe",
+      "notes": "Great Power in 17th century."
+    },
+    {
+      "id": "kingdom_asturias",
+      "name": "Kingdom of Asturias",
+      "also_known_as": ["Asturias"],
+      "active_from": 718,
+      "active_to": 924,
+      "peak_years": [800, 850],
+      "region_hint": "europe",
+      "notes": "Christian successor state in northern Iberia after Umayyad conquest."
+    },
+    {
+      "id": "duchy_bavaria",
+      "name": "Duchy of Bavaria",
+      "also_known_as": ["Bavaria"],
+      "active_from": 555,
+      "active_to": 1806,
+      "peak_years": [800, 1200],
+      "region_hint": "europe",
+      "notes": "Part of Frankish realm from 788; later part of HRE."
+    },
+    {
+      "id": "duchy_saxony",
+      "name": "Duchy of Saxony",
+      "also_known_as": ["Saxony"],
+      "active_from": 804,
+      "active_to": 1180,
+      "peak_years": [900, 1050],
+      "region_hint": "europe",
+      "notes": "Incorporated into Frankish Empire by Charlemagne."
+    },
+    {
+      "id": "khazar_khaganate",
+      "name": "Khazar Khaganate",
+      "also_known_as": ["Khazaria"],
+      "active_from": 650,
+      "active_to": 969,
+      "peak_years": [750, 850],
+      "region_hint": "europe",
+      "notes": "Turkic semi-nomadic state north of the Caucasus."
+    },
+    {
+      "id": "bulgarian_empire",
+      "name": "First Bulgarian Empire",
+      "also_known_as": ["Bulgaria", "Danubian Bulgaria"],
+      "active_from": 681,
+      "active_to": 1018,
+      "peak_years": [800, 900],
+      "region_hint": "europe",
+      "notes": "Founded 681 on Danube delta; conquered by Byzantium 1018."
+    }
+  ]
+}
