@@ -61,16 +61,10 @@ jobs:
           fi
           echo ".env is not committed — OK"
 
-      - name: Check for hardcoded secrets patterns
-        run: |
-          # Fail if any source file contains a bare API key pattern
-          if grep -rn --include="*.py" \
-            -E "(sk-[a-zA-Z0-9]{20,}|AIza[0-9A-Za-z_-]{35}|['\"]api_key['\"]:\s*['\"][^'\"]{20,}['\"])" \
-            agents/ geo/ knowledge/ storage/ api/ cli/ ; then
-            echo "ERROR: Possible hardcoded secret detected above."
-            exit 1
-          fi
-          echo "No hardcoded secret patterns found — OK"
+      - name: gitleaks — scan for exposed secrets
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   # ── 3. Unit tests ──────────────────────────────────────────────────────────
   test:
