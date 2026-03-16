@@ -1,4 +1,4 @@
-.PHONY: setup generate run-api test test-unit test-integration lint
+.PHONY: setup generate run-api test test-unit test-integration lint mongo-up mongo-down
 
 VENV   := .venv
 PYTHON := $(VENV)/bin/python
@@ -30,3 +30,9 @@ test-integration:
 lint:
 	$(VENV)/bin/ruff check .
 	$(VENV)/bin/mypy .
+
+mongo-up:
+	docker compose up -d mongo
+
+mongo-down:
+	docker compose down
