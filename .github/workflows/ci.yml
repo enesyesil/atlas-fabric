@@ -90,11 +90,15 @@ jobs:
       - name: Run unit tests
         run: pytest tests/unit/ -v --tb=short
 
-  # ── 4. Integration tests (requires secrets) ────────────────────────────────
+  # ── 4. Integration tests (optional — skipped when no API keys are configured) ──
   integration:
     name: Integration Tests
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main' || github.event_name == 'pull_request'
+    # Only attempt on main branch or PRs — and only when at least one API key secret exists.
+    # If no secrets are configured this job is skipped entirely; CI still passes.
+    if: |
+      (github.ref == 'refs/heads/main' || github.event_name == 'pull_request') &&
+      (secrets.AZURE_API_KEY != '' || secrets.ANTHROPIC_API_KEY != '' || secrets.OPENAI_API_KEY != '')
     needs: [lint, security, test]
 
     services:
@@ -143,4 +147,3 @@ jobs:
 
       - name: Run integration tests
         run: pytest tests/integration/ -v --tb=short
-        continue-on-error: true
