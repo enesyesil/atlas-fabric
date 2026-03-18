@@ -31,6 +31,16 @@
       "notes": "Replaced Umayyad Caliphate. Ended with Mongol sack of Baghdad 1258."
     },
     {
+      "id": "crusader_states",
+      "name": "Crusader States",
+      "also_known_as": ["Outremer", "Latin States of the Levant"],
+      "active_from": 1099,
+      "active_to": 1291,
+      "peak_years": [1100, 1170],
+      "region_hint": "middle_east",
+      "notes": "Collective term for the Latin Christian states established in the Levant after the First Crusade."
+    },
+    {
       "id": "umayyad_caliphate",
       "name": "Umayyad Caliphate",
       "also_known_as": ["Umayyad Empire"],

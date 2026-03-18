@@ -1,7 +1,6 @@
 import json
 from pathlib import Path
 
-
 _POLITIES: list[dict] | None = None
 _POLITIES_BY_ID: dict[str, dict] | None = None
 

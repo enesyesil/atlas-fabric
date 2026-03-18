@@ -2,9 +2,8 @@ import json
 from pathlib import Path
 
 import typer
-from dotenv import load_dotenv
 
-load_dotenv()
+from agents.runtime_env import load_environment
 
 app = typer.Typer(help="AtlasFabric — Historical boundary generation engine.")
 
@@ -17,16 +16,22 @@ def generate(
     output: Path | None = typer.Option(None, "--output", "-o", help="Write config JSON to file"),
 ):
     """Run the historical boundary generation pipeline."""
+    from agents.tracing import configure_tracing
     from geo.regions import list_regions
+
+    load_environment()
+
     valid_regions = list_regions()
 
     if region not in valid_regions:
         typer.echo(f"Error: Unknown region '{region}'. Valid: {valid_regions}", err=True)
         raise typer.Exit(1)
 
+    configure_tracing(run_name=f"generate-{year}-{region}")
     typer.echo(f"Generating year={year} region={region} dry_run={dry_run}")
 
     from agents.orchestrator import run_pipeline
+
     state = run_pipeline(year=year, region=region, dry_run=dry_run)
 
     decision = state.get("review_decision", "unknown")

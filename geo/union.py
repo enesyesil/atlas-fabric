@@ -1,11 +1,12 @@
 from shapely import from_wkt
+from shapely.geometry.base import BaseGeometry
 from shapely.ops import unary_union
 
 
 def union_by_polity(
     polygons: list[dict],
     classifications: dict[str, str],
-) -> dict[str, object]:
+) -> dict[str, BaseGeometry]:
     """
     Union polygon geometries grouped by polity assignment.
 

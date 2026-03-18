@@ -10,6 +10,7 @@ dependencies = [
     "langgraph>=0.2",
     "langchain>=0.3",
     "langchain-anthropic",
+    "langchain-azure-ai",
     "langchain-openai",
     "langchain-google-genai",
     "langchain-ollama",
@@ -22,6 +23,9 @@ dependencies = [
     "uvicorn[standard]",
     "typer>=0.13",
     "pydantic>=2.0",
+    "opentelemetry-sdk>=1.20.0",
+    "openinference-instrumentation-langchain>=0.1.0",
+    "pymongo>=4.0.0",
     "slowapi",
     "python-dotenv",
 ]
@@ -29,7 +33,6 @@ dependencies = [
 [project.optional-dependencies]
 dev = [
     "pytest",
-    "pytest-asyncio",
     "ruff",
     "mypy",
     "httpx",
@@ -48,10 +51,15 @@ select = ["E", "F", "I", "UP"]
 python_version = "3.12"
 strict = false
 ignore_missing_imports = true
+follow_imports = "skip"
+
+[[tool.mypy.overrides]]
+module = ["dotenv", "dotenv.*", "certifi", "certifi.*"]
+follow_imports = "skip"
+ignore_missing_imports = true
 
 [tool.hatch.build.targets.wheel]
-packages = ["agents", "cli", "geo", "knowledge", "storage", "api"]
+packages = ["agents", "api", "cli", "evals", "geo", "knowledge", "storage"]
 
 [tool.pytest.ini_options]
-asyncio_mode = "auto"
 testpaths = ["tests"]

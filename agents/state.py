@@ -1,4 +1,5 @@
 from typing import Any
+
 from typing_extensions import TypedDict
 
 
@@ -11,7 +12,7 @@ class AtlasState(TypedDict):
     # Working data
     polygons: list[dict]                # GeoJSON Feature dicts from Natural Earth
     classifications: dict[str, str]     # admin_id → polity_name
-    confidence_scores: dict[str, float] # polity_name → 0.0–1.0
+    confidence_scores: dict[str, float] # admin_id → 0.0–1.0
     polity_geometries: dict[str, Any]   # polity_name → Shapely geometry (post-union)
 
     # Validation

@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import UTC, datetime
 
 from pydantic import BaseModel, Field
 
@@ -11,10 +11,13 @@ class MapConfigMetadata(BaseModel):
     polity_count: int
     retry_count: int
     review_decision: str
-    known_limitations: list[str] = [
-        "Natural Earth uses modern boundaries; historical polities did not follow modern province lines.",
-        "polities.json accuracy depends on seeded knowledge base.",
-    ]
+    known_limitations: list[str] = Field(
+        default_factory=lambda: [
+            "Natural Earth uses modern boundaries; historical polities did not follow "
+            "modern province lines.",
+            "polities.json accuracy depends on seeded knowledge base.",
+        ]
+    )
 
 
 class MapConfigDocument(BaseModel):
@@ -23,5 +26,5 @@ class MapConfigDocument(BaseModel):
     region: str
     config: dict
     metadata: MapConfigMetadata
-    created_at: datetime = Field(default_factory=datetime.utcnow)
-    updated_at: datetime = Field(default_factory=datetime.utcnow)
+    created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
+    updated_at: datetime = Field(default_factory=lambda: datetime.now(UTC))

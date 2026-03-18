@@ -1,4 +1,3 @@
-import pytest
 from shapely.geometry import Polygon
 
 from geo.union import union_by_polity

@@ -23,10 +23,10 @@ jobs:
         run: pip install ruff mypy
 
       - name: ruff check
-        run: ruff check .
+        run: ruff check agents api cli evals geo knowledge storage tests
 
       - name: mypy
-        run: mypy agents/ geo/ knowledge/ storage/ api/ cli/ --ignore-missing-imports
+        run: mypy agents api cli evals geo knowledge storage --ignore-missing-imports --no-site-packages
 
   # ── 2. Security ────────────────────────────────────────────────────────────
   security:
@@ -45,7 +45,7 @@ jobs:
 
       - name: bandit — static security analysis
         run: |
-          bandit -r agents/ geo/ knowledge/ storage/ api/ cli/ \
+          bandit -r agents api cli evals geo knowledge storage \
             --severity-level medium \
             --confidence-level medium \
             -f txt
@@ -82,7 +82,7 @@ jobs:
         run: pip install -e ".[dev]"
 
       - name: Run unit tests
-        run: pytest tests/unit/ -v --tb=short
+        run: PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 pytest tests/unit tests/integration/test_api.py -v --tb=short
 
   # ── 4. Integration tests (optional — skipped when no API keys are configured) ──
   integration:
@@ -105,6 +105,8 @@ jobs:
       MONGODB_URI: mongodb://localhost:27017
       GENERATOR_MODEL: ${{ secrets.GENERATOR_MODEL }}
       REVIEWER_MODEL: ${{ secrets.REVIEWER_MODEL }}
+      # For azure/ models, use the direct Foundry endpoint root:
+      # https://<resource>.services.ai.azure.com/openai/v1
       AZURE_API_BASE: ${{ secrets.AZURE_API_BASE }}
       AZURE_API_KEY: ${{ secrets.AZURE_API_KEY }}
       ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
@@ -140,4 +142,4 @@ jobs:
           mv /tmp/ne/ne_10m_admin_1_states_provinces.geojson data/
 
       - name: Run integration tests
-        run: pytest tests/integration/ -v --tb=short
+        run: PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 pytest tests/integration/test_pipeline.py -v --tb=short

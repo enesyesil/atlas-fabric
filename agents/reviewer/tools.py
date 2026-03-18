@@ -2,6 +2,8 @@ from langchain_core.tools import tool
 
 from knowledge.validator import (
     detect_anachronism as _detect_anachronism,
+)
+from knowledge.validator import (
     verify_polity_exists as _verify_polity_exists,
 )
 

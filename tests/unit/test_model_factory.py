@@ -1,4 +1,6 @@
 import os
+import sys
+from types import ModuleType
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -74,6 +76,16 @@ def test_correct_provider_selected_ollama():
         m.assert_called_once_with("llama3", 0.0)
 
 
+def test_correct_provider_selected_azure():
+    from agents.model_factory import _build_model
+
+    mock_model = MagicMock()
+    with patch("agents.model_factory._load_azure", return_value=mock_model) as m:
+        result = _build_model("azure/Kimi-Prod", 0.1)
+        m.assert_called_once_with("Kimi-Prod", 0.1)
+        assert result is mock_model
+
+
 def test_temperature_passed_correctly():
     from agents.model_factory import _build_model
     mock_model = MagicMock()
@@ -114,7 +126,7 @@ def test_default_temperature_is_zero():
 
 def test_all_providers_registered():
     from agents.model_factory import _PROVIDER_MAP
-    expected = {"anthropic", "openai", "google", "ollama", "groq", "mistral"}
+    expected = {"anthropic", "openai", "google", "ollama", "groq", "mistral", "azure"}
     assert set(_PROVIDER_MAP.keys()) == expected
 
 
@@ -125,3 +137,65 @@ def test_model_name_with_slash_preserved():
     with patch("agents.model_factory._load_openai", return_value=mock_model) as m:
         _build_model("openai/org/gpt-4o", 0.0)
         m.assert_called_once_with("org/gpt-4o", 0.0)
+
+
+def test_azure_requires_base_and_key():
+    from agents.model_factory import _load_azure
+
+    with patch.dict(os.environ, {}, clear=True):
+        with pytest.raises(ValueError, match="AZURE_API_BASE"):
+            _load_azure("kimi-k2-5", 0.0)
+
+    with patch.dict(
+        os.environ,
+        {"AZURE_API_BASE": "https://resource.services.ai.azure.com/openai/v1"},
+        clear=True,
+    ):
+        with pytest.raises(ValueError, match="AZURE_API_KEY"):
+            _load_azure("kimi-k2-5", 0.0)
+
+
+def test_azure_rejects_legacy_inference_url():
+    from agents.model_factory import _load_azure
+
+    env = {
+        "AZURE_API_BASE": (
+            "https://resource.services.ai.azure.com/models/chat/completions"
+            "?api-version=2024-05-01-preview"
+        ),
+        "AZURE_API_KEY": "secret",
+    }
+    with patch.dict(os.environ, env, clear=True):
+        with pytest.raises(ValueError, match="/openai/v1"):
+            _load_azure("kimi-prod", 0.0)
+
+
+def test_azure_loader_uses_official_foundry_chat_model():
+    from agents.model_factory import _load_azure
+
+    fake_cls = MagicMock(name="AzureAIChatCompletionsModel")
+    fake_chat_models = ModuleType("langchain_azure_ai.chat_models")
+    fake_chat_models.AzureAIChatCompletionsModel = fake_cls
+    fake_package = ModuleType("langchain_azure_ai")
+    fake_package.chat_models = fake_chat_models
+
+    env = {
+        "AZURE_API_BASE": "https://resource.services.ai.azure.com/openai/v1/",
+        "AZURE_API_KEY": "secret",
+    }
+    with patch.dict(
+        sys.modules,
+        {
+            "langchain_azure_ai": fake_package,
+            "langchain_azure_ai.chat_models": fake_chat_models,
+        },
+    ):
+        with patch.dict(os.environ, env, clear=True):
+            _load_azure("Kimi-Prod", 0.2)
+
+    fake_cls.assert_called_once_with(
+        endpoint="https://resource.services.ai.azure.com/openai/v1",
+        credential="secret",
+        model="Kimi-Prod",
+        temperature=0.2,
+    )

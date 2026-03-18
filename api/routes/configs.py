@@ -5,6 +5,19 @@ from storage.mongo import get_config, list_configs, list_configs_range
 router = APIRouter(prefix="/api/v1/configs", tags=["configs"])
 
 
+@router.get("/range")
+async def get_configs_range(
+    start: int = Query(...),
+    end: int = Query(...),
+    region: str = Query(default="world"),
+    limit: int = Query(default=100, ge=1, le=500),
+):
+    if start > end:
+        raise HTTPException(status_code=400, detail="start must be <= end")
+    configs = await list_configs_range(start, end, region, limit=limit)
+    return {"start": start, "end": end, "region": region, "limit": limit, "results": configs}
+
+
 @router.get("/{year}")
 async def get_config_by_year(
     year: int,
@@ -27,15 +40,3 @@ async def list_configs_paginated(
 ):
     configs = await list_configs(region, page, limit)
     return {"region": region, "page": page, "limit": limit, "results": configs}
-
-
-@router.get("/range")
-async def get_configs_range(
-    start: int = Query(...),
-    end: int = Query(...),
-    region: str = Query(default="world"),
-):
-    if start > end:
-        raise HTTPException(status_code=400, detail="start must be <= end")
-    configs = await list_configs_range(start, end, region)
-    return {"start": start, "end": end, "region": region, "results": configs}

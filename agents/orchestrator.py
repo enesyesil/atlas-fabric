@@ -1,5 +1,6 @@
 import logging
 
+from agents.graph_runtime import aggregate_confidence_by_polity
 from agents.state import AtlasState
 
 logger = logging.getLogger(__name__)
@@ -56,6 +57,13 @@ def run_pipeline(year: int, region: str, dry_run: bool = False) -> AtlasState:
         state["messages"] = []
         state = generator_graph.invoke(state)
 
+        if state.get("existing_config"):
+            existing_config = state["existing_config"] or {}
+            metadata = existing_config.get("metadata", {})
+            state["review_decision"] = metadata.get("review_decision", "approved")
+            state["review_feedback"] = ""
+            return state
+
         logger.info("Reviewer starting (attempt %d)…", attempt)
         state["messages"] = []
         state = reviewer_graph.invoke(state)
@@ -85,10 +93,15 @@ def _store_config(state: AtlasState) -> None:
     """Store approved config to MongoDB. Called ONLY after reviewer approval."""
     import asyncio
     import os
+
     from storage.mongo import save_config
     from storage.schema import MapConfigDocument, MapConfigMetadata
 
     meta_raw = state.get("metadata", {})
+    polity_confidence_scores = aggregate_confidence_by_polity(
+        state.get("classifications", {}),
+        state.get("confidence_scores", {}),
+    )
     metadata = MapConfigMetadata(
         generator_model=meta_raw.get(
             "generator_model",
@@ -98,7 +111,7 @@ def _store_config(state: AtlasState) -> None:
             "reviewer_model",
             os.environ.get("REVIEWER_MODEL", "unknown"),
         ),
-        confidence_scores=state.get("confidence_scores", {}),
+        confidence_scores=polity_confidence_scores,
         polygon_count=len(state.get("polygons", [])),
         polity_count=len(state.get("polity_geometries", {})),
         retry_count=state.get("retry_count", 0),

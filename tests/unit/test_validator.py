@@ -1,8 +1,6 @@
-import pytest
 from shapely.geometry import Polygon
 
-from geo.validator import check_validity, check_overlaps, validate_classifications
-
+from geo.validator import check_overlaps, check_validity, validate_classifications
 
 VALID_WKT = "POLYGON ((0 0, 1 0, 1 1, 0 1, 0 0))"
 # self-intersecting bowtie — invalid

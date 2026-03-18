@@ -1,6 +1,7 @@
 import os
 
-from fastapi import HTTPException, Request, status
+from fastapi import Request, status
+from fastapi.responses import JSONResponse
 
 
 async def api_key_middleware(request: Request, call_next):
@@ -8,12 +9,12 @@ async def api_key_middleware(request: Request, call_next):
         return await call_next(request)
 
     api_key = request.headers.get("X-API-Key")
-    secret = os.environ.get("API_SECRET_KEY", "changeme")
+    secret = os.environ["API_SECRET_KEY"]
 
     if not api_key or api_key != secret:
-        raise HTTPException(
+        return JSONResponse(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid or missing X-API-Key header",
+            content={"detail": "Invalid or missing X-API-Key header"},
         )
 
     return await call_next(request)

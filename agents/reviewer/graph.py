@@ -1,9 +1,11 @@
 import json
+from typing import Any
 
 from langchain_core.messages import HumanMessage, SystemMessage
 from langgraph.graph import END, StateGraph
-from langgraph.prebuilt import ToolNode, tools_condition
+from langgraph.prebuilt import tools_condition
 
+from agents.graph_runtime import invoke_tool_calls, reviewer_state_update
 from agents.model_factory import get_model
 from agents.reviewer.prompts import SYSTEM_PROMPT
 from agents.reviewer.tools import (
@@ -26,7 +28,7 @@ TOOLS = [
 ]
 
 
-def build_reviewer_graph() -> StateGraph:
+def build_reviewer_graph() -> Any:
     llm = get_model("reviewer")
     llm_with_tools = llm.bind_tools(TOOLS)
 
@@ -54,38 +56,33 @@ def build_reviewer_graph() -> StateGraph:
         response = llm_with_tools.invoke(messages)
         return {"messages": messages + [response]}
 
+    def tool_node(state: AtlasState) -> dict:
+        return invoke_tool_calls(state, TOOLS, reviewer_state_update)
+
     def extract_decision(state: AtlasState) -> dict:
-        """Parse the final submit_review_decision result from message history."""
-        for msg in reversed(state.get("messages", [])):
-            content = getattr(msg, "content", "")
-            if not isinstance(content, str):
-                continue
-            try:
-                data = json.loads(content)
-                if "decision" in data and data["decision"] in ("approved", "partial", "rejected"):
-                    return {
-                        "review_decision": data["decision"],
-                        "review_feedback": data.get("feedback", ""),
-                    }
-            except (json.JSONDecodeError, TypeError):
-                continue
+        if state.get("review_decision") in {"approved", "partial", "rejected"}:
+            return {
+                "review_decision": state["review_decision"],
+                "review_feedback": state.get("review_feedback", ""),
+            }
         return {
             "review_decision": "rejected",
-            "review_feedback": "Could not parse review decision from agent output.",
+            "review_feedback": "Reviewer did not submit a final decision.",
         }
 
     graph = StateGraph(AtlasState)
     graph.add_node("agent", agent_node)
-    graph.add_node("tools", ToolNode(TOOLS))
+    graph.add_node("tools", tool_node)
     graph.add_node("extract_decision", extract_decision)
     graph.set_entry_point("agent")
-    graph.add_conditional_edges("agent", tools_condition)
+    graph.add_conditional_edges("agent", tools_condition, {
+        "tools": "tools",
+        "__end__": "extract_decision",
+    })
     graph.add_edge("tools", "agent")
-    # After the agent stops calling tools, extract the decision
-    graph.add_edge("agent", "extract_decision")
     graph.add_edge("extract_decision", END)
 
     return graph.compile()
 
 
-reviewer_graph = build_reviewer_graph()
+reviewer_graph: Any = build_reviewer_graph()

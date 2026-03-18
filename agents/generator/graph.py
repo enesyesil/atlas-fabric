@@ -1,6 +1,8 @@
+from typing import Any
+
 from langchain_core.messages import HumanMessage, SystemMessage
 from langgraph.graph import END, StateGraph
-from langgraph.prebuilt import ToolNode, tools_condition
+from langgraph.prebuilt import tools_condition
 
 from agents.generator.prompts import RETRY_PROMPT_TEMPLATE, SYSTEM_PROMPT
 from agents.generator.tools import (
@@ -15,6 +17,7 @@ from agents.generator.tools import (
     union_geometries,
     validate_geometry,
 )
+from agents.graph_runtime import generator_state_update, invoke_tool_calls
 from agents.model_factory import get_model
 from agents.state import AtlasState
 
@@ -32,13 +35,16 @@ TOOLS = [
 ]
 
 
-def build_generator_graph() -> StateGraph:
+def build_generator_graph() -> Any:
     llm = get_model("generator")
     llm_with_tools = llm.bind_tools(TOOLS)
 
     def agent_node(state: AtlasState) -> dict:
         messages = state.get("messages", [])
         if not messages:
+            if state.get("existing_config"):
+                return {"messages": messages}
+
             retry_count = state.get("retry_count", 0)
             review_feedback = state.get("review_feedback", "")
             if retry_count > 0 and review_feedback:
@@ -61,14 +67,22 @@ def build_generator_graph() -> StateGraph:
         response = llm_with_tools.invoke(messages)
         return {"messages": messages + [response]}
 
+    def tool_node(state: AtlasState) -> dict:
+        return invoke_tool_calls(state, TOOLS, generator_state_update)
+
+    def after_tools(state: AtlasState) -> str:
+        if state.get("existing_config"):
+            return "__end__"
+        return "agent"
+
     graph = StateGraph(AtlasState)
     graph.add_node("agent", agent_node)
-    graph.add_node("tools", ToolNode(TOOLS))
+    graph.add_node("tools", tool_node)
     graph.set_entry_point("agent")
-    graph.add_conditional_edges("agent", tools_condition)
-    graph.add_edge("tools", "agent")
+    graph.add_conditional_edges("agent", tools_condition, {"tools": "tools", "__end__": END})
+    graph.add_conditional_edges("tools", after_tools, {"agent": "agent", "__end__": END})
 
     return graph.compile()
 
 
-generator_graph = build_generator_graph()
+generator_graph: Any = build_generator_graph()

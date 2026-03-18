@@ -2,10 +2,11 @@ import os
 
 from langchain_core.tools import tool
 
+from agents.graph_runtime import aggregate_confidence_by_polity
 from geo.loader import load_polygons as _load_polygons
 from geo.regions import get_bounds, list_regions
 from geo.union import union_by_polity
-from geo.validator import check_validity, check_overlaps, validate_classifications
+from geo.validator import check_overlaps, check_validity, validate_classifications
 from knowledge.validator import get_polities_for_year
 
 
@@ -177,9 +178,10 @@ def validate_geometry(polity_geometries: dict[str, str]) -> dict:
     Returns {"valid": bool, "errors": list[str]}.
     If valid is False, re-classify the conflicting polygons and re-call union_geometries."""
     from shapely import from_wkt
+    from shapely.geometry.base import BaseGeometry
 
     all_errors: list[str] = []
-    shapely_geoms: dict[str, object] = {}
+    shapely_geoms: dict[str, BaseGeometry] = {}
 
     for polity, wkt in polity_geometries.items():
         errs = check_validity(wkt)
@@ -197,6 +199,7 @@ def build_maplibre_config(
     year: int,
     region: str,
     polity_geometries: dict[str, str],
+    classifications: dict[str, str],
     confidence_scores: dict[str, float],
     metadata: dict,
 ) -> dict:
@@ -204,15 +207,18 @@ def build_maplibre_config(
     ONLY call after validate_geometry returns {"valid": True}.
     Returns the complete map_config dict ready for storage and API serving."""
     import hashlib
+
     import shapely
     from shapely import from_wkt
 
     def _colour(name: str) -> str:
-        h = int(hashlib.md5(name.encode()).hexdigest()[:6], 16)
+        h = int(hashlib.md5(name.encode(), usedforsecurity=False).hexdigest()[:6], 16)
         r = 80 + ((h >> 16) & 0xFF) % 120
         g = 80 + ((h >> 8) & 0xFF) % 120
         b = 80 + (h & 0xFF) % 120
         return f"#{r:02x}{g:02x}{b:02x}"
+
+    polity_confidence_scores = aggregate_confidence_by_polity(classifications, confidence_scores)
 
     features = []
     for polity_name, wkt in polity_geometries.items():
@@ -223,7 +229,7 @@ def build_maplibre_config(
                 "polity_id": polity_name.lower().replace(" ", "_"),
                 "polity_name": polity_name,
                 "color": _colour(polity_name),
-                "confidence": confidence_scores.get(polity_name, 0.5),
+                "confidence": polity_confidence_scores.get(polity_name, 0.0),
                 "year": year,
             },
             "geometry": shapely.geometry.mapping(geom),

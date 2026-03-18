@@ -9,9 +9,9 @@ Always call:
 
 import os
 from typing import Literal
+from urllib.parse import urlparse
 
 from langchain_core.language_models import BaseChatModel
-
 
 Role = Literal["generator", "reviewer"]
 
@@ -102,25 +102,80 @@ def _load_groq(model_name: str, temperature: float) -> BaseChatModel:
 
 def _load_mistral(model_name: str, temperature: float) -> BaseChatModel:
     from langchain_mistralai import ChatMistralAI
-    return ChatMistralAI(model=model_name, temperature=temperature)
+    return ChatMistralAI(model_name=model_name, temperature=temperature)
 
 
 def _load_azure(model_name: str, temperature: float) -> BaseChatModel:
-    # Azure AI Foundry — OpenAI-compatible serverless endpoint.
+    # Azure AI Foundry — official LangChain Azure AI integration.
     # Required env vars:
-    #   AZURE_API_BASE  = https://<your-endpoint>.inference.ai.azure.com
+    #   AZURE_API_BASE  = https://<resource>.services.ai.azure.com/openai/v1
     #   AZURE_API_KEY   = <your-azure-ai-foundry-key>
-    # Usage: GENERATOR_MODEL=azure/kimi-k2-5
-    from langchain_openai import ChatOpenAI
+    # Usage: GENERATOR_MODEL=azure/<deployment-name>
     base_url = os.environ.get("AZURE_API_BASE")
     api_key = os.environ.get("AZURE_API_KEY")
     if not base_url:
-        raise ValueError("AZURE_API_BASE is not set. Example: https://your-endpoint.inference.ai.azure.com")
+        raise ValueError(
+            "AZURE_API_BASE is not set. "
+            "Example: https://<resource>.services.ai.azure.com/openai/v1"
+        )
     if not api_key:
         raise ValueError("AZURE_API_KEY is not set.")
-    return ChatOpenAI(
-        model=model_name,
+
+    endpoint = _validate_azure_endpoint(base_url)
+    deployment_name = _validate_azure_deployment_name(model_name)
+
+    try:
+        from langchain_azure_ai.chat_models import AzureAIChatCompletionsModel
+    except ImportError as exc:
+        raise ImportError(
+            "langchain-azure-ai is not installed. "
+            "Install project dependencies again to use azure/<deployment-name> models."
+        ) from exc
+
+    return AzureAIChatCompletionsModel(
+        endpoint=endpoint,
+        credential=api_key,
+        model=deployment_name,
         temperature=temperature,
-        base_url=base_url,
-        api_key=api_key,  # type: ignore[arg-type]
     )
+
+
+def _validate_azure_endpoint(base_url: str) -> str:
+    endpoint = base_url.strip().rstrip("/")
+    if not endpoint:
+        raise ValueError(
+            "AZURE_API_BASE must be set to a direct Foundry endpoint ending in /openai/v1."
+        )
+
+    legacy_markers = ("/models", "/chat/completions", "api-version=")
+    if any(marker in endpoint.lower() for marker in legacy_markers):
+        raise ValueError(
+            "AZURE_API_BASE is using the deprecated Azure AI Inference request URL format. "
+            "Use the direct Foundry OpenAI-compatible endpoint root ending in /openai/v1, "
+            "for example https://<resource>.services.ai.azure.com/openai/v1. "
+            "GENERATOR_MODEL and REVIEWER_MODEL must use the deployment name: "
+            "azure/<deployment-name>."
+        )
+
+    parsed = urlparse(endpoint)
+    if parsed.scheme != "https" or not parsed.netloc:
+        raise ValueError(
+            "AZURE_API_BASE must be a valid https URL ending in /openai/v1."
+        )
+    if not parsed.path.endswith("/openai/v1"):
+        raise ValueError(
+            "AZURE_API_BASE must point to the direct Foundry OpenAI-compatible endpoint root "
+            "ending in /openai/v1, for example "
+            "https://<resource>.services.ai.azure.com/openai/v1."
+        )
+    return endpoint
+
+
+def _validate_azure_deployment_name(model_name: str) -> str:
+    deployment_name = model_name.strip()
+    if not deployment_name:
+        raise ValueError(
+            "Azure model strings must use the deployment name. "
+            "Example: GENERATOR_MODEL=azure/<deployment-name>"
+        )
+    return deployment_name

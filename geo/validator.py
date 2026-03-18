@@ -1,5 +1,6 @@
 from shapely import from_wkt
 from shapely.geometry import MultiPolygon, Polygon
+from shapely.geometry.base import BaseGeometry
 
 
 def check_validity(geometry_wkt: str) -> list[str]:
@@ -15,7 +16,7 @@ def check_validity(geometry_wkt: str) -> list[str]:
         return errors
 
     if not geom.is_valid:
-        errors.append(f"Invalid geometry (shapely validity check failed)")
+        errors.append("Invalid geometry (shapely validity check failed)")
 
     if not isinstance(geom, (Polygon, MultiPolygon)):
         errors.append(f"Expected Polygon or MultiPolygon, got {type(geom).__name__}")
@@ -29,7 +30,7 @@ def check_validity(geometry_wkt: str) -> list[str]:
     return errors
 
 
-def check_overlaps(polity_geometries: dict[str, object]) -> list[str]:
+def check_overlaps(polity_geometries: dict[str, BaseGeometry]) -> list[str]:
     """
     Check that no two polities share overlapping area.
     Returns list of error strings describing overlapping pairs.
